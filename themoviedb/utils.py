@@ -9,16 +9,20 @@ from dacite import Config, from_dict
 T = TypeVar("T")
 DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 
+
+def parse_dt(x):
+    if not x:
+        return None
+    try:
+        return datetime.fromisoformat(x)
+    except ValueError:
+        return datetime.strptime(x, "%Y-%m-%d %H:%M:%S %Z")
+
 config = Config(
     cast=[Enum],
     type_hooks={
-        datetime: lambda x: datetime.fromisoformat(
-            x.replace(" UTC", "+00:00").replace(" ", "T")
-        ) if x else None,
-
-        date: lambda x: datetime.fromisoformat(
-            x.replace(" UTC", "+00:00").replace(" ", "T")
-        ).date() if x else None,
+        datetime: parse_dt,
+        date: lambda x: parse_dt(x).date() if x else None,
     },
 )
 
