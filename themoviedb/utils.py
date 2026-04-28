@@ -12,11 +12,15 @@ DATETIME_FORMAT = "%Y-%m-%dT%H:%M:%S.%f"
 config = Config(
     cast=[Enum],
     type_hooks={
-        datetime: lambda x: datetime.fromisoformat(x.rstrip("Z")) if x else None,
-        date: lambda x: datetime.fromisoformat(x.rstrip("Z")).date() if x else None,
+        datetime: lambda x: datetime.fromisoformat(
+            x.replace(" UTC", "+00:00").replace(" ", "T")
+        ) if x else None,
+
+        date: lambda x: datetime.fromisoformat(
+            x.replace(" UTC", "+00:00").replace(" ", "T")
+        ).date() if x else None,
     },
 )
-
 
 def dict_factory(data: List[Any]) -> Dict[str, Any]:
     def convert_value(value: Any) -> Any:
